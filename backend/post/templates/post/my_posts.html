@@ -1,0 +1,77 @@
+{% extends 'post/base.html' %}
+{% block mainblock %}
+<div class="container py-5">
+    <h2 class="mb-4">پست‌های شما</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if posts %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>کد رهگیری</th>
+                        <th>نام کالا</th>
+                        <th>وزن (کیلوگرم)</th>
+                        <th>قیمت (تومان)</th>
+                        <th>گیرنده</th>
+                        <th>آدرس گیرنده</th>
+                        <th>شماره تماس</th>
+                        <th>وضعیت</th>
+                        {% if user.is_superuser %}
+                        <th>تغییر وضعیت</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for post in posts %}
+                        <tr>
+                            <td>{{ post.tracking_code }}</td>
+                            <td>{{ post.item_name }}</td>
+                            <td>{{ post.item_weight }}</td>
+                            <td>{{ post.item_price }}</td>
+                            <td>{{ post.receiver_name }}</td>
+                            <td>{{ post.receiver_address }}</td>
+                            <td>{{ post.receiver_phone }}</td>
+                            <td>
+                                {% if post.status == "در حال پردازش" %}
+                                    <span class="badge bg-warning text-dark">{{ post.status }}</span>
+                                {% elif post.status == "ارسال شد" %}
+                                    <span class="badge bg-success">{{ post.status }}</span>
+                                {% elif post.status == "لغو شده" %}
+                                    <span class="badge bg-danger">{{ post.status }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ post.status }}</span>
+                                {% endif %}
+                            </td>
+                            {% if user.is_superuser %}
+                            <td>
+                                <form method="post" class="d-flex gap-2">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="post_id" value="{{ post.id }}">
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option value="در حال پردازش" {% if post.status == "در حال پردازش" %}selected{% endif %}>در حال پردازش</option>
+                                        <option value="ارسال شد" {% if post.status == "ارسال شد" %}selected{% endif %}>ارسال شد</option>
+                                        <option value="لغو شده" {% if post.status == "لغو شده" %}selected{% endif %}>لغو شده</option>
+                                    </select>
+                                    <button type="submit" class="btn btn-sm btn-primary">ثبت</button>
+                                </form>
+                            </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-muted">هیچ پستی برای نمایش وجود ندارد.</p>
+    {% endif %}
+</div>
+{% endblock %}

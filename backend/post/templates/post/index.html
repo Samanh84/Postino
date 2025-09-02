@@ -1,0 +1,56 @@
+{% extends 'post/base.html' %}
+{% load static %}
+{% block mainblock %}
+
+<!-- Hero Section with Background Image and Search Bar -->
+<section class="hero position-relative">
+    <img src="{% static 'images/banner-coverart.png' %}" class="img-fluid w-100" style="height: 600px; object-fit: cover;" alt="بنر">
+    <div class="hero-content position-absolute top-50 start-50 translate-middle text-center text-white">
+        <h1 class="display-4">پیگیری وضعیت پست‌های خود را انجام دهید</h1>
+        <p class="lead">کد رهگیری پست خود را وارد کنید تا وضعیت آن را مشاهده کنید</p>
+        <form method="post" action="{% url 'track_post' %}" class="d-flex justify-content-center mt-4">
+            {% csrf_token %}
+            <input type="text" name="tracking_code" class="form-control w-50" placeholder="کد رهگیری را وارد کنید" required>
+            <button type="submit" class="btn btn-primary ms-2">جستجو</button>
+        </form>
+    </div>
+</section>
+
+
+
+
+<!-- Additional Content Section (Services) -->
+<section class="container py-5">
+    <h2 class="text-center mb-4">خدمات ما</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{% static 'images/postino-redbox.png' %}" class="card-img-top" alt="Service 1">
+                <div class="card-body">
+                    <h5 class="card-title">🔒 پستینو پستی ایمن</h5>
+                    <p class="card-text">پستینو از بسته ات به خوبی محافظت میکنه تا به دست گیرنده برسه</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{% static 'images/postino-bg-green.png' %}" class="card-img-top" alt="Service 2">
+                <div class="card-body">
+                    <h5 class="card-title"> ⚡ پستینو سریع</h5>
+                    <p class="card-text">پستینو به سریع ترین روش بسته رو ارسال میکنه</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{% static 'images/postino-bg-red.png' %}" class="card-img-top" alt="Service 3">
+                <div class="card-body">
+                    <h5 class="card-title">🔥 با پستینو پشتت گرمه</h5>
+                    <p class="card-text">🛟 پستیو تا وقتی بسته ارسال بشه پشتیانی داره</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,11 @@
+.hero-content {
+    width: 100%;
+}
+
+.hero-form input {
+    max-width: 400px;
+}
+
+.hero-form button {
+    min-width: 100px;
+}

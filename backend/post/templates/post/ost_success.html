@@ -1,0 +1,7 @@
+{% extends 'post/base.html' %}
+
+{% block mainblock %}
+<h2>پست شما ثبت شد!</h2>
+<p>کد پیگیری شما: <strong>{{ tracking_code }}</strong></p>
+<a href="{% url 'index' %}" class="btn btn-secondary">بازگشت به صفحه اصلی</a>
+{% endblock %}

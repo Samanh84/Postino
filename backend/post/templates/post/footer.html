@@ -1,0 +1,40 @@
+<!-- Footer -->
+<footer class="bg-dark text-light py-5 mt-5">
+    <div class="container text-center">
+        <!-- متن حق نشر -->
+        <p class="mb-2">&copy; 2025 Postino</p>
+        <p class="mb-4">این یک پرتفویلو است که توسط <strong>سامان حسینیان</strong> ساخته شده است.</p>
+
+        <!-- دسترسی ها -->
+        <div class="mb-4">
+            {% if user.is_authenticated %}
+                <a href="{% url 'my_posts' %}" class="d-block text-light mb-2">
+                    <i class="bi bi-card-checklist"></i> پست‌های من
+                </a>
+                <a href="{% url 'create_post' %}" class="d-block text-light mb-2">
+                    <i class="bi bi-plus-square-fill"></i> ثبت پست
+                </a>
+                <form method="post" action="{% url 'logout' %}" class="d-block">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-light btn-sm mt-2">
+                        <i class="bi bi-box-arrow-right"></i> خروج
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="d-block text-light mb-2">
+                    <i class="bi bi-box-arrow-in-right"></i> ورود
+                </a>
+                <a href="{% url 'signup' %}" class="d-block text-light mb-2">
+                    <i class="bi bi-person-plus-fill"></i> ثبت‌نام
+                </a>
+            {% endif %}
+        </div>
+
+        <!-- شبکه‌های اجتماعی -->
+        <div>
+            <a href="https://github.com/Samanh84" class="text-light mx-2 fs-4"><i class="bi bi-github"></i></a>
+            <a href="#" class="text-light mx-2 fs-4"><i class="bi bi-linkedin"></i></a>
+            <a href="https://instagram.com/saman.hosseinian" class="text-light mx-2 fs-4"><i class="bi bi-instagram"></i></a>
+        </div>
+    </div>
+</footer>

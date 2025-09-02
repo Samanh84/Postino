@@ -1,0 +1,13 @@
+{% extends 'post/base.html' %}
+
+{% block mainblock %}
+<h2>ثبت‌نام کاربر جدید</h2>
+
+<form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">ثبت‌نام</button>
+</form>
+
+<p>قبلاً ثبت‌نام کرده‌اید؟ <a href="{% url 'login' %}">ورود</a></p>
+{% endblock %}
