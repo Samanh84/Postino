@@ -2,14 +2,10 @@ from django.db import models
 from django.contrib.auth.models import User
 import random
 import string
-from django.core.exceptions import ValidationError
-
 
 # generate unique tracking code
 def generate_tracking_code():
-    code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-    return code
-
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 class Post(models.Model):
     item_name = models.CharField(max_length=200, verbose_name="نام کالا")
@@ -43,41 +39,30 @@ class Post(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="ثبت شده توسط")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
 
-    # Weight kg and g
+    # Weight in kg and g
     def weight_kg_g(self):
-        total_grams = int(self.item_weight * 1000)
+        total_grams = int(round(self.item_weight * 1000))
         kg = total_grams // 1000
         g = total_grams % 1000
-        if kg and g:
-            return f"{kg} کیلوگرم و {g} گرم"
-        elif kg:
-            return f"{kg} کیلوگرم"
-        elif g:
-            return f"{g} گرم"
-        else:
-            return "0 گرم"
+        parts = []
+        if kg > 0:
+            parts.append(f"{kg} کیلوگرم")
+        if g > 0:
+            parts.append(f"{g} گرم")
+        return " و ".join(parts) if parts else "0 گرم"
 
-    # نرمال‌سازی شماره تلفن به E.164
-    def normalize_phone(self, phone: str) -> str:
-        phone = phone.strip().replace(" ", "").replace("-", "")
-
-        if phone.isdigit() and len(phone) == 10:
-            return f"+98{phone}"
-        elif phone.startswith("0") and len(phone) == 11:
-            return f"+98{phone[1:]}"
-        elif phone.startswith("98") and not phone.startswith("+98"):
-            return f"+{phone}"
-        elif phone.startswith("+98"):
-            return phone
-        else:
-            raise ValidationError({
-                'receiver_phone': 'شماره تماس معتبر نیست. باید با 09 یا 98 یا +98 شروع شود یا 10 رقم خام باشد.'
-            })
-
-    # override save برای نرمال‌سازی شماره تلفن
+    # Normalize phone to E.164 format for storage only
     def save(self, *args, **kwargs):
         if self.receiver_phone:
-            self.receiver_phone = self.normalize_phone(self.receiver_phone)
+            phone = self.receiver_phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
+            if phone.isdigit() and len(phone) == 10:
+                self.receiver_phone = f"+98{phone}"
+            elif phone.startswith("0") and len(phone) == 11:
+                self.receiver_phone = f"+98{phone[1:]}"
+            elif phone.startswith("98") and not phone.startswith("+98"):
+                self.receiver_phone = f"+{phone}"
+            elif phone.startswith("+98") and len(phone) == 13:
+                self.receiver_phone = phone
         super().save(*args, **kwargs)
 
     def __str__(self):

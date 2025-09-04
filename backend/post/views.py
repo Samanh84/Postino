@@ -20,7 +20,7 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, 'ثبت‌نام با موفقیت انجام شد! خوش آمدید.')
+            messages.success(request, '.ثبت‌نام با موفقیت انجام شد! خوش آمدید')
             return redirect('index')
     else:
         form = CustomUserCreationForm()
@@ -80,9 +80,9 @@ def my_posts(request):
                 post.save()
                 messages.success(request, f'وضعیت پست {post.tracking_code} به "{new_status}" تغییر کرد.')
             else:
-                messages.error(request, 'شما اجازه تغییر وضعیت این پست را ندارید.')
+                messages.error(request, '.شما اجازه تغییر وضعیت این پست را ندارید')
         except Post.DoesNotExist:
-            messages.error(request, 'پست مورد نظر یافت نشد.')
+            messages.error(request, '.پست مورد نظر یافت نشد')
         return redirect('my_posts')
 
     return render(request, 'post/my_posts.html', {'posts': posts})

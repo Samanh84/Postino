@@ -1,7 +1,6 @@
 {% extends 'post/base.html' %}
 {% load widget_tweaks %}
 
-
 {% block mainblock %}
 <div class="container my-5">
     <div class="card shadow-sm">
@@ -9,35 +8,27 @@
             <h3 class="mb-0">ثبت پست جدید</h3>
         </div>
         <div class="card-body">
-            <form method="post">
+            <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="row g-3">
 
                     {% for field in form %}
-                        {% if field.name == "receiver_phone" %}
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ field.label_tag }}
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ field.label_tag }}
+                                {% if field.name == "receiver_phone" %}
                                     <div class="input-group">
                                         <span class="input-group-text">+98</span>
                                         {{ field|add_class:"form-control" }}
                                     </div>
-                                    {% if field.errors %}
-                                        <div class="text-danger small">{{ field.errors }}</div>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        {% else %}
-                            <div class="col-md-6">
-                                <div class="mb-3">
-                                    {{ field.label_tag }}
+                                {% else %}
                                     {{ field|add_class:"form-control" }}
-                                    {% if field.errors %}
-                                        <div class="text-danger small">{{ field.errors }}</div>
-                                    {% endif %}
-                                </div>
+                                {% endif %}
+                                {% if field.errors %}
+                                    <div class="text-danger small">{{ field.errors }}</div>
+                                {% endif %}
                             </div>
-                        {% endif %}
+                        </div>
                     {% endfor %}
 
                 </div>
@@ -48,4 +39,15 @@
         </div>
     </div>
 </div>
+
+<!-- optional: small JS to auto-remove spaces/hyphens before submit -->
+<script>
+document.querySelector('form').addEventListener('submit', function(e) {
+    const phoneInput = document.querySelector('[name="receiver_phone"]');
+    if (phoneInput) {
+        phoneInput.value = phoneInput.value.replace(/\s|-/g, '');
+    }
+});
+</script>
+
 {% endblock %}
