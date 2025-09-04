@@ -1,19 +1,32 @@
 from django.shortcuts import render, redirect
-from .forms import PostForm
-from .models import Post
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from .auth_forms import CustomUserCreationForm, EmailLoginForm
+from .forms import PostForm
+from .models import Post
 
-# صفحه اصلی با فرم پیگیری
+# Home Page
 def index(request):
     if request.method == 'POST':
         tracking_code = request.POST.get('tracking_code')
         return redirect('track_post', tracking_code=tracking_code)
     return render(request, 'post/index.html')
 
-# ثبت پست جدید
+# SignUp page
+def signup(request):
+    if request.method == 'POST':
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'ثبت‌نام با موفقیت انجام شد! خوش آمدید.')
+            return redirect('index')
+    else:
+        form = CustomUserCreationForm()
+    return render(request, 'post/signup.html', {'form': form})
+
+# Create new Post
 @login_required
 def create_post(request):
     if request.method == 'POST':
@@ -28,9 +41,11 @@ def create_post(request):
         form = PostForm()
     return render(request, 'post/post_create.html', {'form': form})
 
-# نمایش وضعیت پست در صفحه جدا
+# Tracking post (نمایش وضعیت کد رهگیری)
 def track_post(request, tracking_code=None):
+    post = None
     status = None
+
     if tracking_code is None and request.method == 'POST':
         tracking_code = request.POST.get('tracking_code')
 
@@ -42,24 +57,12 @@ def track_post(request, tracking_code=None):
             status = 'not_found'
 
     return render(request, 'post/track_post.html', {
+        'post': post,
         'status': status,
         'tracking_code': tracking_code
     })
 
-# ثبت نام کاربر
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            messages.success(request, 'ثبت‌نام با موفقیت انجام شد! خوش آمدید.')
-            return redirect('index')
-    else:
-        form = UserCreationForm()
-    return render(request, 'post/signup.html', {'form': form})
-
-# پنل پست‌ها (نمایش و مدیریت)
+# Manage panel (مشاهده و تغییر وضعیت پست)
 @login_required
 def my_posts(request):
     if request.user.is_superuser:
@@ -72,7 +75,6 @@ def my_posts(request):
         new_status = request.POST.get('status')
         try:
             post = Post.objects.get(id=post_id)
-            # فقط ادمین می‌تواند وضعیت دیگران را تغییر دهد
             if request.user.is_superuser or post.created_by == request.user:
                 post.status = new_status
                 post.save()
