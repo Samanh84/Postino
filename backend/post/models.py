@@ -14,7 +14,7 @@ class Post(models.Model):
 
     receiver_name = models.CharField(max_length=200, verbose_name="نام گیرنده")
     receiver_address = models.TextField(verbose_name="آدرس گیرنده")
-    receiver_phone = models.CharField(max_length=15, verbose_name="شماره تماس گیرنده")  # همیشه +98...
+    receiver_phone = models.CharField(max_length=15, verbose_name="شماره تماس گیرنده")  #  +98
 
     # status
     STATUS_CHOICES = [
