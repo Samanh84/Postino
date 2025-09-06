@@ -5,7 +5,7 @@ import string
 
 # generate unique tracking code
 def generate_tracking_code():
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
 class Post(models.Model):
     item_name = models.CharField(max_length=200, verbose_name="نام کالا")
