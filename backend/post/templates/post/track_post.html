@@ -24,42 +24,36 @@
                     <h3 class="text-success mt-2">رهگیری مرسوله</h3>
                 </div>
 
-                <!-- مشخصات کلی -->
-                <div class="mb-4 border rounded overflow-hidden">
-                    <div class="d-flex justify-content-between p-2 border-bottom">
-                        <strong>کد رهگیری:</strong>
-                        <span style="direction: ltr; unicode-bidi: embed; font-family: monospace;">
-                            {{ post.tracking_code }}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between p-2 border-bottom">
-                        <strong>گیرنده:</strong>
-                        <span>{{ post.receiver_name }}</span>
-                    </div>
-                    <div class="d-flex justify-content-between p-2 border-bottom">
-                        <strong>استان مقصد:</strong>
-                        <span>
+                <!-- مشخصات کلی با جدول -->
+                <table class="table table-bordered" style="direction:rtl;">
+                    <tr>
+                        <th class="text-end" style="width:150px;">کد رهگیری:</th>
+                        <td>{{ post.tracking_code }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-end">گیرنده:</th>
+                        <td>{{ post.receiver_name }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-end">استان مقصد:</th>
+                        <td>
                             {{ post.destination_province.name }}
                             {% if post.destination_city %}
-                                &nbsp;/&nbsp;{{ post.destination_city.name }}
+                                / {{ post.destination_city.name }}
                             {% endif %}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between p-2 border-bottom">
-                        <strong>وزن کالا:</strong>
-                        <span>
-                            {% if post.item_weight < 1 %}
-                                {{ post.item_weight|floatformat:3|cut:"0"|cut:"." }} گرم
-                            {% else %}
-                                {{ post.item_weight|floatformat:3|cut:"0"|cut:"." }} کیلوگرم
-                            {% endif %}
-                        </span>
-                    </div>
-                    <div class="d-flex justify-content-between p-2">
-                        <strong>وضعیت کلی:</strong>
-                        <span>{{ post.status }}</span>
-                    </div>
-                </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-end">وزن کالا:</th>
+                        <td style="direction:rtl; unicode-bidi:embed; text-align:right;">
+                            {{ post.weight_display }}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-end">وضعیت کلی:</th>
+                        <td>{{ post.get_status_display }}</td>
+                    </tr>
+                </table>
 
                 <!-- تاریخچه وضعیت‌ها -->
                 <h5 class="mb-3 text-end">تاریخچه وضعیت‌ها</h5>
@@ -74,7 +68,7 @@
                                         <span>
                                             <strong>{{ h.province.name }}</strong>
                                             {% if h.city %}
-                                                &nbsp;/&nbsp;<strong>{{ h.city.name }}</strong>
+                                                / <strong>{{ h.city.name }}</strong>
                                             {% endif %}
                                             - <span class="text-muted">{{ h.status_text }}</span>
                                         </span>

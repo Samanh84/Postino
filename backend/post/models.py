@@ -2,8 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 import random
 import string
+from decimal import Decimal, ROUND_HALF_UP
 
-# generate unique tracking code
+# تولید کد رهگیری
 def generate_tracking_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
@@ -108,8 +109,24 @@ class Post(models.Model):
                 self.receiver_phone = phone
         super().save(*args, **kwargs)
 
+    def weight_display(self):
+        """نمایش هوشمند وزن به فارسی"""
+        weight = self.item_weight  # DecimalField
+
+        if weight < Decimal('1'):
+            grams = int((weight * 1000).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+            return f"{grams} گرم"
+
+        kilos = int(weight)
+        grams = int(((weight - Decimal(kilos)) * 1000).quantize(Decimal('1'), rounding=ROUND_HALF_UP))
+
+        if grams == 0:
+            return f"{kilos} کیلوگرم"
+        else:
+            return f"{kilos} کیلو {grams} گرم"
+
     def __str__(self):
-        return f"{self.item_name} - {self.tracking_code}"
+        return f"{self.item_name} - {self.get_status_display()} - {self.tracking_code}"
 
 
 class PostStatusHistory(models.Model):
@@ -145,7 +162,7 @@ class PostStatusHistory(models.Model):
                     return f"تحویل گیرنده در {self.post.destination_province.name} / {self.post.destination_city.name}"
                 return f"تحویل گیرنده در {self.post.destination_province.name}"
             return "تحویل گیرنده"
-        return self.get_status_display()
+        return dict(self.STATUS_CHOICES).get(self.status, self.status)
 
     def __str__(self):
         if self.city:
