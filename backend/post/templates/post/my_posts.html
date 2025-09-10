@@ -39,34 +39,64 @@
                             <td>{{ post.origin_province.name }}</td>
                             <td>{{ post.destination_province.name }}</td>
                             <td>
-                                {% if post.history.last %}
-                                    {{ post.history.last.province.name }}
-                                    <br>
-                                    <small class="text-muted">{{ post.history.last.created_at|date:"Y/m/d H:i" }}</small>
+                                {% if post.history.exists %}
+                                    {% for step in post.history.all %}
+                                        {{ step.province.name }}{% if step.city %} - {{ step.city.name }}{% endif %}
+                                        <small class="text-muted">({{ step.created_at|date:"Y/m/d H:i" }})</small>
+                                        <br>
+                                    {% endfor %}
                                 {% else %}
                                     <span class="text-muted">—</span>
                                 {% endif %}
                             </td>
-                            <td>
-                                {% if post.status == "در حال پردازش" %}
-                                    <span class="badge bg-warning text-dark">{{ post.status }}</span>
-                                {% elif post.status == "ارسال شد" %}
-                                    <span class="badge bg-success">{{ post.status }}</span>
-                                {% elif post.status == "لغو شد" %}
-                                    <span class="badge bg-danger">{{ post.status }}</span>
-                                {% elif post.status == "تحویل داده شد" %}
-                                    <span class="badge bg-primary">{{ post.status }}</span>
-                                {% else %}
-                                    <span class="badge bg-secondary">{{ post.status }}</span>
-                                {% endif %}
-                            </td>
+                            <td class="text-center">{{ post.status }}</td>
                             <td>{{ post.created_at|date:"Y/m/d H:i" }}</td>
 
                             {% if user.is_superuser %}
                             <td class="text-center">
                                 <div class="d-flex flex-column gap-2">
-                                    <!-- تغییر وضعیت -->
-                                    <form method="post" class="d-flex gap-2">
+
+                                    <!-- فرم ثبت مسیر جدید -->
+                                    <form method="post" class="d-flex flex-column gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="post_id" value="{{ post.id }}">
+
+                                        <select name="new_province" class="form-select form-select-sm" onchange="updateCities(this)">
+                                            <option value="">انتخاب استان</option>
+                                            {% for province in provinces %}
+                                                <option value="{{ province.id }}">{{ province.name }}</option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <select name="new_city" class="form-select form-select-sm">
+                                            <option value="">انتخاب شهر</option>
+                                            {% for province in provinces %}
+                                                {% for city in province.cities.all %}
+                                                    <option value="{{ city.id }}" data-province="{{ province.id }}">{{ city.name }}</option>
+                                                {% endfor %}
+                                            {% endfor %}
+                                        </select>
+
+                                        <select name="new_status" class="form-select form-select-sm">
+                                            <option value="in_transit">در راه</option>
+                                            <option value="arrived">رسیده</option>
+                                            <option value="delivered">تحویل داده شد</option>
+                                        </select>
+
+                                        <button type="submit" name="add_history" class="btn btn-sm btn-primary mt-1">
+                                            ثبت مسیر جدید
+                                        </button>
+                                    </form>
+
+                                    <!-- فرم حذف پست -->
+                                    <form method="post" onsubmit="return confirm('آیا از حذف این پست مطمئن هستید؟');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_post_id" value="{{ post.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger mt-1">حذف پست</button>
+                                    </form>
+
+                                    <!-- فرم تغییر وضعیت کلی پست -->
+                                    <form method="post" class="d-flex gap-2 mt-1">
                                         {% csrf_token %}
                                         <input type="hidden" name="post_id" value="{{ post.id }}">
                                         <select name="status" class="form-select form-select-sm">
@@ -75,15 +105,9 @@
                                             <option value="تحویل داده شد" {% if post.status == "تحویل داده شد" %}selected{% endif %}>تحویل داده شد</option>
                                             <option value="لغو شد" {% if post.status == "لغو شد" %}selected{% endif %}>لغو شد</option>
                                         </select>
-                                        <button type="submit" class="btn btn-sm btn-primary">ثبت</button>
+                                        <button type="submit" class="btn btn-sm btn-secondary">تغییر وضعیت</button>
                                     </form>
 
-                                    <!-- حذف پست -->
-                                    <form method="post" onsubmit="return confirm('آیا از حذف این پست مطمئن هستید؟');">
-                                        {% csrf_token %}
-                                        <input type="hidden" name="delete_post_id" value="{{ post.id }}">
-                                        <button type="submit" class="btn btn-sm btn-danger w-100">حذف</button>
-                                    </form>
                                 </div>
                             </td>
                             {% endif %}
@@ -93,7 +117,19 @@
             </table>
         </div>
     {% else %}
-        <p class="text-muted">.هیچ پستی برای نمایش وجود ندارد</p>
+        <p class="text-muted">هیچ پستی برای نمایش وجود ندارد.</p>
     {% endif %}
 </div>
+
+<script>
+function updateCities(provinceSelect) {
+    const provinceId = provinceSelect.value;
+    const citySelect = provinceSelect.nextElementSibling;
+    for (let i = 0; i < citySelect.options.length; i++) {
+        const option = citySelect.options[i];
+        option.style.display = (option.dataset.province === provinceId) ? 'block' : 'none';
+    }
+    citySelect.value = '';
+}
+</script>
 {% endblock %}

@@ -13,7 +13,8 @@ class Province(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class City(models.Model):
     name = models.CharField(max_length=100, verbose_name="شهر")
     province = models.ForeignKey(
@@ -41,7 +42,6 @@ class Post(models.Model):
     receiver_address = models.TextField(verbose_name="آدرس گیرنده")
     receiver_phone = models.CharField(max_length=15, verbose_name="شماره تماس گیرنده")
 
-    # Provinces and Cities
     origin_province = models.ForeignKey(
         Province,
         on_delete=models.CASCADE,
@@ -56,7 +56,6 @@ class Post(models.Model):
         verbose_name="شهر مبدأ",
         null=True, blank=True
     )
-
     destination_province = models.ForeignKey(
         Province,
         on_delete=models.CASCADE,
@@ -73,15 +72,16 @@ class Post(models.Model):
     )
 
     STATUS_CHOICES = [
-        ('در حال پردازش', 'در حال پردازش'),
-        ('ارسال شد', 'ارسال شد'),
-        ('تحویل داده شد', 'تحویل داده شد'),
-        ('لغو شد', 'لغو شد'),
+        ("registered", "ثبت در سیستم"),
+        ("in_transit", "رهسپار مقصد"),
+        ("arrived", "رسیده به استان/شهر"),
+        ("delivered", "تحویل داده شد"),
+        ("canceled", "لغو شد"),
     ]
     status = models.CharField(
         max_length=50,
         choices=STATUS_CHOICES,
-        default='در حال پردازش',
+        default="registered",
         verbose_name="وضعیت پست"
     )
 
@@ -94,18 +94,8 @@ class Post(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="ثبت شده توسط")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
 
-    def weight_kg_g(self):
-        total_grams = int(round(self.item_weight * 1000))
-        kg = total_grams // 1000
-        g = total_grams % 1000
-        parts = []
-        if kg > 0:
-            parts.append(f"{kg} کیلوگرم")
-        if g > 0:
-            parts.append(f"{g} گرم")
-        return " و ".join(parts) if parts else "0 گرم"
-
     def save(self, *args, **kwargs):
+        # نرمال‌سازی شماره تلفن
         if self.receiver_phone:
             phone = self.receiver_phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
             if phone.isdigit() and len(phone) == 10:
@@ -125,15 +115,39 @@ class Post(models.Model):
 class PostStatusHistory(models.Model):
     STATUS_CHOICES = [
         ("registered", "ثبت در سیستم"),
-        ("in_transit", "در حال ارسال"),
-        ("arrived", "رسیده به استان"),
+        ("in_transit", "رهسپار مقصد"),
+        ("arrived", "رسیده به استان/شهر"),
         ("delivered", "تحویل داده شد"),
+        ("canceled", "لغو شد"),
     ]
 
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="history", verbose_name="مرسوله")
     province = models.ForeignKey(Province, on_delete=models.CASCADE, verbose_name="استان")
+    city = models.ForeignKey(City, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="شهر")
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, verbose_name="وضعیت")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ و ساعت")
 
+    class Meta:
+        verbose_name = "تاریخچه وضعیت پست"
+        verbose_name_plural = "تاریخچه وضعیت پست‌ها"
+
+    def status_text(self):
+        """تولید متن فارسی هوشمند برای وضعیت‌ها"""
+        if self.status == "in_transit":
+            if self.post.destination_province:
+                if self.post.destination_city:
+                    return f"رهسپار {self.post.destination_province.name} / {self.post.destination_city.name} شد"
+                return f"رهسپار {self.post.destination_province.name} شد"
+            return "رهسپار مقصد شد"
+        elif self.status == "delivered":
+            if self.post.destination_province:
+                if self.post.destination_city:
+                    return f"تحویل گیرنده در {self.post.destination_province.name} / {self.post.destination_city.name}"
+                return f"تحویل گیرنده در {self.post.destination_province.name}"
+            return "تحویل گیرنده"
+        return self.get_status_display()
+
     def __str__(self):
-        return f"{self.post.tracking_code} - {self.province.name} - {self.get_status_display()}"
+        if self.city:
+            return f"{self.post.tracking_code} - {self.province.name} / {self.city.name} - {self.status_text()}"
+        return f"{self.post.tracking_code} - {self.province.name} - {self.status_text()}"
