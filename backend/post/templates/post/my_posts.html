@@ -15,19 +15,18 @@
     {% if posts %}
         <div class="table-responsive">
             <table class="table table-bordered table-striped align-middle">
-                <thead class="table-dark">
+                <thead class="table-dark text-center">
                     <tr>
                         <th>کد رهگیری</th>
                         <th>نام کالا</th>
-                        <th>وزن</th>
-                        <th>قیمت (تومان)</th>
                         <th>گیرنده</th>
-                        <th>آدرس گیرنده</th>
-                        <th>شماره تماس</th>
+                        <th>استان مبدأ</th>
+                        <th>استان مقصد</th>
+                        <th>آخرین مکان</th>
                         <th>وضعیت</th>
                         <th>تاریخ ثبت</th>
                         {% if user.is_superuser %}
-                        <th>تغییر وضعیت</th>
+                        <th>مدیریت</th>
                         {% endif %}
                     </tr>
                 </thead>
@@ -36,11 +35,18 @@
                         <tr>
                             <td>{{ post.tracking_code }}</td>
                             <td>{{ post.item_name }}</td>
-                            <td>{{ post.weight_kg_g }}</td>
-                            <td>{{ post.item_price|floatformat:0 }}</td>
                             <td>{{ post.receiver_name }}</td>
-                            <td>{{ post.receiver_address }}</td>
-                            <td>{{ post.receiver_phone }}</td>
+                            <td>{{ post.origin_province.name }}</td>
+                            <td>{{ post.destination_province.name }}</td>
+                            <td>
+                                {% if post.history.last %}
+                                    {{ post.history.last.province.name }}
+                                    <br>
+                                    <small class="text-muted">{{ post.history.last.created_at|date:"Y/m/d H:i" }}</small>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
                             <td>
                                 {% if post.status == "در حال پردازش" %}
                                     <span class="badge bg-warning text-dark">{{ post.status }}</span>
@@ -48,24 +54,37 @@
                                     <span class="badge bg-success">{{ post.status }}</span>
                                 {% elif post.status == "لغو شد" %}
                                     <span class="badge bg-danger">{{ post.status }}</span>
+                                {% elif post.status == "تحویل داده شد" %}
+                                    <span class="badge bg-primary">{{ post.status }}</span>
                                 {% else %}
                                     <span class="badge bg-secondary">{{ post.status }}</span>
                                 {% endif %}
                             </td>
                             <td>{{ post.created_at|date:"Y/m/d H:i" }}</td>
+
                             {% if user.is_superuser %}
-                            <td>
-                                <form method="post" class="d-flex gap-2">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="post_id" value="{{ post.id }}">
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="در حال پردازش" {% if post.status == "در حال پردازش" %}selected{% endif %}>در حال پردازش</option>
-                                        <option value="ارسال شد" {% if post.status == "ارسال شد" %}selected{% endif %}>ارسال شد</option>
-                                        <option value="تحویل داده شد" {% if post.status == "تحویل داده شد" %}selected{% endif %}>تحویل داده شد</option>
-                                        <option value="لغو شد" {% if post.status == "لغو شد" %}selected{% endif %}>لغو شد</option>
-                                    </select>
-                                    <button type="submit" class="btn btn-sm btn-primary">ثبت</button>
-                                </form>
+                            <td class="text-center">
+                                <div class="d-flex flex-column gap-2">
+                                    <!-- تغییر وضعیت -->
+                                    <form method="post" class="d-flex gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="post_id" value="{{ post.id }}">
+                                        <select name="status" class="form-select form-select-sm">
+                                            <option value="در حال پردازش" {% if post.status == "در حال پردازش" %}selected{% endif %}>در حال پردازش</option>
+                                            <option value="ارسال شد" {% if post.status == "ارسال شد" %}selected{% endif %}>ارسال شد</option>
+                                            <option value="تحویل داده شد" {% if post.status == "تحویل داده شد" %}selected{% endif %}>تحویل داده شد</option>
+                                            <option value="لغو شد" {% if post.status == "لغو شد" %}selected{% endif %}>لغو شد</option>
+                                        </select>
+                                        <button type="submit" class="btn btn-sm btn-primary">ثبت</button>
+                                    </form>
+
+                                    <!-- حذف پست -->
+                                    <form method="post" onsubmit="return confirm('آیا از حذف این پست مطمئن هستید؟');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_post_id" value="{{ post.id }}">
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">حذف</button>
+                                    </form>
+                                </div>
                             </td>
                             {% endif %}
                         </tr>

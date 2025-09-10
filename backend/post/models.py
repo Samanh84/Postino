@@ -7,6 +7,31 @@ import string
 def generate_tracking_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
+
+class Province(models.Model):
+    name = models.CharField(max_length=100, unique=True, verbose_name="استان")
+
+    def __str__(self):
+        return self.name
+    
+class City(models.Model):
+    name = models.CharField(max_length=100, verbose_name="شهر")
+    province = models.ForeignKey(
+        Province,
+        on_delete=models.CASCADE,
+        related_name="cities",
+        verbose_name="استان"
+    )
+
+    class Meta:
+        unique_together = ('name', 'province')
+        verbose_name = "شهر"
+        verbose_name_plural = "شهرها"
+
+    def __str__(self):
+        return f"{self.name} ({self.province.name})"
+
+
 class Post(models.Model):
     item_name = models.CharField(max_length=200, verbose_name="نام کالا")
     item_weight = models.DecimalField(max_digits=6, decimal_places=3, verbose_name="وزن کالا (کیلوگرم)")
@@ -14,9 +39,39 @@ class Post(models.Model):
 
     receiver_name = models.CharField(max_length=200, verbose_name="نام گیرنده")
     receiver_address = models.TextField(verbose_name="آدرس گیرنده")
-    receiver_phone = models.CharField(max_length=15, verbose_name="شماره تماس گیرنده")  #  +98
+    receiver_phone = models.CharField(max_length=15, verbose_name="شماره تماس گیرنده")
 
-    # status
+    # Provinces and Cities
+    origin_province = models.ForeignKey(
+        Province,
+        on_delete=models.CASCADE,
+        related_name="origin_posts",
+        verbose_name="استان مبدأ",
+        null=True, blank=True
+    )
+    origin_city = models.ForeignKey(
+        City,
+        on_delete=models.CASCADE,
+        related_name="origin_posts",
+        verbose_name="شهر مبدأ",
+        null=True, blank=True
+    )
+
+    destination_province = models.ForeignKey(
+        Province,
+        on_delete=models.CASCADE,
+        related_name="destination_posts",
+        verbose_name="استان مقصد",
+        null=True, blank=True
+    )
+    destination_city = models.ForeignKey(
+        City,
+        on_delete=models.CASCADE,
+        related_name="destination_posts",
+        verbose_name="شهر مقصد",
+        null=True, blank=True
+    )
+
     STATUS_CHOICES = [
         ('در حال پردازش', 'در حال پردازش'),
         ('ارسال شد', 'ارسال شد'),
@@ -39,7 +94,6 @@ class Post(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="ثبت شده توسط")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
 
-    # Weight in kg and g
     def weight_kg_g(self):
         total_grams = int(round(self.item_weight * 1000))
         kg = total_grams // 1000
@@ -51,7 +105,6 @@ class Post(models.Model):
             parts.append(f"{g} گرم")
         return " و ".join(parts) if parts else "0 گرم"
 
-    # Normalize phone to E.164 format for storage only
     def save(self, *args, **kwargs):
         if self.receiver_phone:
             phone = self.receiver_phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
@@ -67,3 +120,20 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.item_name} - {self.tracking_code}"
+
+
+class PostStatusHistory(models.Model):
+    STATUS_CHOICES = [
+        ("registered", "ثبت در سیستم"),
+        ("in_transit", "در حال ارسال"),
+        ("arrived", "رسیده به استان"),
+        ("delivered", "تحویل داده شد"),
+    ]
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="history", verbose_name="مرسوله")
+    province = models.ForeignKey(Province, on_delete=models.CASCADE, verbose_name="استان")
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, verbose_name="وضعیت")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ و ساعت")
+
+    def __str__(self):
+        return f"{self.post.tracking_code} - {self.province.name} - {self.get_status_display()}"

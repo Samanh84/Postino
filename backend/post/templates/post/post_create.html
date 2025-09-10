@@ -4,43 +4,55 @@
 {% block mainblock %}
 <div class="container my-5">
     <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
+        <div class="card-header bg-success text-white">
             <h3 class="mb-0">ثبت پست جدید</h3>
         </div>
+
         <div class="card-body">
             <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="row g-3">
-
+                    
                     {% for field in form %}
                         <div class="col-md-6">
                             <div class="mb-3">
                                 {{ field.label_tag }}
+                                
                                 {% if field.name == "receiver_phone" %}
                                     <div class="input-group">
                                         <span class="input-group-text">+98</span>
                                         {{ field|add_class:"form-control" }}
                                     </div>
+
+                                {% elif field.name == "origin_province" or field.name == "destination_province" %}
+                                    {{ field|add_class:"form-select"|attr:"onchange:this.form.submit()" }}
+
+                                {% elif field.name == "origin_city" or field.name == "destination_city" %}
+                                    {{ field|add_class:"form-select" }}
+
                                 {% else %}
                                     {{ field|add_class:"form-control" }}
                                 {% endif %}
+                                
                                 {% if field.errors %}
-                                    <div class="text-danger small">{{ field.errors }}</div>
+                                    <div class="text-danger small mt-1">{{ field.errors }}</div>
                                 {% endif %}
                             </div>
                         </div>
                     {% endfor %}
-
                 </div>
+
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-success btn-lg">ثبت پست</button>
+                    <button type="submit" class="btn btn-success btn-lg px-5">
+                        <i class="bi bi-check-circle"></i> ثبت پست
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-<!-- optional: small JS to auto-remove spaces/hyphens before submit -->
+<!-- پاکسازی شماره تماس قبل از ارسال -->
 <script>
 document.querySelector('form').addEventListener('submit', function(e) {
     const phoneInput = document.querySelector('[name="receiver_phone"]');
@@ -49,5 +61,4 @@ document.querySelector('form').addEventListener('submit', function(e) {
     }
 });
 </script>
-
 {% endblock %}
