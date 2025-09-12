@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('post.urls')),  # شامل تمام مسیرهای اپلیکیشن post
+    path('', include('post.urls')),  # all Directtions app
 ]
 

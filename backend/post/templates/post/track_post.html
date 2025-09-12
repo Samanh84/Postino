@@ -18,13 +18,13 @@
                 </div>
 
             {% elif post %}
-                <!-- عنوان اصلی -->
+                <!--  Orginal Content -->
                 <div class="text-center mb-4">
                     <i class="bi bi-truck text-success" style="font-size: 3rem;"></i>
                     <h3 class="text-success mt-2">رهگیری مرسوله</h3>
                 </div>
 
-                <!-- مشخصات کلی با جدول -->
+                <!-- General specifications with table -->
                 <table class="table table-bordered" style="direction:rtl;">
                     <tr>
                         <th class="text-end" style="width:150px;">کد رهگیری:</th>
@@ -55,14 +55,14 @@
                     </tr>
                 </table>
 
-                <!-- تاریخچه وضعیت‌ها -->
+                <!-- Status history -->
                 <h5 class="mb-3 text-end">تاریخچه وضعیت‌ها</h5>
                 {% if history %}
                     <ul class="list-group">
                         {% for h in history %}
                             <li class="list-group-item text-end">
                                 <div class="d-flex justify-content-between align-items-center">
-                                    <!-- متن راست‌چین -->
+                                    
                                     <div class="d-flex align-items-center flex-row-reverse">
                                         <i class="bi bi-box-seam text-primary ms-2"></i>
                                         <span>
@@ -73,7 +73,7 @@
                                             - <span class="text-muted">{{ h.status_text }}</span>
                                         </span>
                                     </div>
-                                    <!-- تاریخ چپ -->
+                                    <!-- history  -->
                                     <small class="text-muted" style="direction: ltr;">
                                         {{ h.created_at|date:"Y/m/d H:i" }}
                                     </small>
@@ -91,7 +91,7 @@
                 <p class="text-center">.لطفاً کد رهگیری را وارد کنید</p>
             {% endif %}
 
-            <!-- دکمه بازگشت -->
+            <!-- Back Btn -->
             <div class="text-center mt-4">
                 <a href="{% url 'index' %}" class="btn btn-secondary">بازگشت به صفحه اصلی</a>
             </div>

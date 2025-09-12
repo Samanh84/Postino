@@ -4,7 +4,7 @@ import random
 import string
 from decimal import Decimal, ROUND_HALF_UP
 
-# تولید کد رهگیری
+# Generate Tracking code
 def generate_tracking_code():
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 
@@ -96,7 +96,7 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ثبت")
 
     def save(self, *args, **kwargs):
-        # نرمال‌سازی شماره تلفن
+        # Normalaize Phone Number
         if self.receiver_phone:
             phone = self.receiver_phone.strip().replace(" ", "").replace("-", "").replace("(", "").replace(")", "")
             if phone.isdigit() and len(phone) == 10:

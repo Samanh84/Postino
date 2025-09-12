@@ -28,15 +28,15 @@ class PostForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # استان‌ها همیشه لود میشن
+        # load province
         self.fields["origin_province"].queryset = Province.objects.all()
         self.fields["destination_province"].queryset = Province.objects.all()
 
-        # شهرها پیش‌فرض خالی می‌مونن
+        # empty Cities
         self.fields["origin_city"].queryset = City.objects.none()
         self.fields["destination_city"].queryset = City.objects.none()
 
-        # اگر استان انتخاب شده باشه → شهرهای مربوطه رو لود کن
+        # if selected Province loaded City
         if "origin_province" in self.data:
             try:
                 province_id = int(self.data.get("origin_province"))
@@ -44,7 +44,7 @@ class PostForm(forms.ModelForm):
             except (ValueError, TypeError):
                 pass
         elif self.instance.pk and self.instance.origin_province:
-            # وقتی فرم edit میشه
+            # When the form is edited
             self.fields["origin_city"].queryset = self.instance.origin_province.cities.order_by("name")
 
         if "destination_province" in self.data:

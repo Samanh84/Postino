@@ -37,7 +37,7 @@ def create_post(request):
             post.created_by = request.user
             post.save()
 
-            # ✅ فقط رکورد اولیه (ثبت در سیستم)
+            # Started With Registered after creat Post! (ثبت در سیستم)
             PostStatusHistory.objects.create(
                 post=post,
                 province=post.origin_province,
@@ -45,7 +45,7 @@ def create_post(request):
                 status="registered"
             )
 
-            # نمایش صفحه موفقیت با کد رهگیری
+            # Success Screen for create post
             return render(request, 'post/post_success.html', {
                 'tracking_code': post.tracking_code
             })
@@ -91,7 +91,7 @@ def my_posts(request):
 
     if request.method == 'POST':
 
-        # ۱️⃣ ثبت تاریخچه جدید (دستی)
+        # Add History in Management panel
         if 'add_history' in request.POST:
             post_id = request.POST.get('post_id')
             province_id = request.POST.get('new_province')
@@ -115,7 +115,7 @@ def my_posts(request):
                     messages.error(request, 'پست یا استان/شهر انتخاب‌شده معتبر نیست')
             return redirect('my_posts')
 
-        # ۲️⃣ تغییر وضعیت کلی پست (🚫 دیگه تاریخچه ایجاد نمی‌کنیم)
+        # Change status box in Management panel
         elif 'status' in request.POST:
             post_id = request.POST.get('post_id')
             new_status = request.POST.get('status')
@@ -131,7 +131,7 @@ def my_posts(request):
                 messages.error(request, 'پست مورد نظر یافت نشد')
             return redirect('my_posts')
 
-        # ۳️⃣ حذف پست
+        # Delete Post
         elif 'delete_post_id' in request.POST:
             post_id = request.POST.get('delete_post_id')
             try:

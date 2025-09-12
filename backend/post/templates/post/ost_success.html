@@ -4,22 +4,22 @@
     <div class="card shadow-lg text-center" style="max-width: 600px; width: 100%;">
         <div class="card-body">
 
-            <!-- آیکن موفقیت -->
+            <!--  success Icon -->
             <div class="mb-3">
                 <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
                 <h3 class="text-success mt-2">پست شما با موفقیت ثبت شد!</h3>
             </div>
 
-            <!-- متن بالایی -->
+            <!--  Uper text -->
             <p class="fw-bold">کد رهگیری شما:</p>
 
-            <!-- کد رهگیری در باکس جدا -->
+            <!-- Tracking code-->
             <div class="my-3 p-3 bg-success bg-opacity-10 border border-success rounded"
                  style="direction: ltr; unicode-bidi: embed; font-family: monospace; font-size: 1.5rem;">
                 {{ tracking_code }}
             </div>
 
-            <!-- دکمه‌ها -->
+            <!-- Btn -->
             <div class="d-flex justify-content-center gap-2 mt-4">
                 <a href="{% url 'index' %}" class="btn btn-secondary">بازگشت به صفحه اصلی</a>
                 <a href="{% url 'track_post' tracking_code=tracking_code %}" class="btn btn-primary">رهگیری مرسوله</a>
